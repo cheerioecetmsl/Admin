@@ -190,7 +190,13 @@ export default function PeopleManagement() {
                 <button 
                   onClick={() => {
                     setEditingId(person.id);
-                    setFormData({ ...person });
+                    setFormData({
+                      name: person.name,
+                      role: person.role,
+                      description: person.description,
+                      category: person.category,
+                      imageURL: person.imageURL || ""
+                    });
                     setIsModalOpen(true);
                   }}
                   className="flex-1 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
