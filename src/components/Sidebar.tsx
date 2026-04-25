@@ -1,0 +1,53 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck } from "lucide-react";
+
+export function Sidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside className="w-72 border-r border-zinc-800 bg-black/50 backdrop-blur-xl flex flex-col sticky top-0 h-screen">
+      <div className="p-8 border-b border-zinc-800">
+        <h1 className="text-xl font-bold tracking-tighter serif text-amber-500">
+          CHEERIO <span className="text-zinc-500">ADMIN</span>
+        </h1>
+      </div>
+
+      <nav className="flex-1 p-6 space-y-2">
+        <NavItem href="/" icon={<LayoutDashboard size={20} />} label="Overview" active={pathname === "/"} />
+        <NavItem href="/archivists" icon={<Users size={20} />} label="Archivists" active={pathname === "/archivists"} />
+        <NavItem href="/people" icon={<ShieldCheck size={20} />} label="The Pantheon" active={pathname === "/people"} />
+        <NavItem href="/hero-manager" icon={<BarChart3 size={20} />} label="Hero Manager" active={pathname === "/hero-manager"} />
+        <NavItem href="/hype" icon={<Megaphone size={20} />} label="Hype Board" active={pathname === "/hype"} />
+        <NavItem href="/leaderboard" icon={<Trophy size={20} />} label="Leaderboard" active={pathname === "/leaderboard"} />
+        <NavItem href="/analytics" icon={<BarChart3 size={20} />} label="Analytics" active={pathname === "/analytics"} />
+      </nav>
+
+      <div className="p-6 border-t border-zinc-800">
+        <NavItem href="/settings" icon={<Settings size={20} />} label="Settings" active={pathname === "/settings"} />
+        <button className="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-red-400 transition-colors w-full">
+          <LogOut size={20} />
+          <span className="text-sm font-medium">Log Out</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function NavItem({ href, icon, label, active }: { href: string, icon: React.ReactNode, label: string, active: boolean }) {
+  return (
+    <Link 
+      href={href}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+        active 
+          ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" 
+          : "text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-200"
+      }`}
+    >
+      {icon}
+      <span className="text-sm font-medium uppercase tracking-widest">{label}</span>
+    </Link>
+  );
+}
