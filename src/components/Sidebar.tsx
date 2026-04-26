@@ -30,7 +30,7 @@ export function Sidebar() {
         </div>
         <NavItem href="/people" icon={<ShieldCheck size={20} />} label="The Pantheon" active={pathname === "/people"} />
         <NavItem href="/hero-manager" icon={<BarChart3 size={20} />} label="Hero Manager" active={pathname === "/hero-manager"} />
-        <NavItem href="/hype" icon={<Megaphone size={20} />} label="Hype Board" active={pathname === "/hype"} />
+        <NavItem href="/hype" icon={<Megaphone size={20} />} label="Notification Bar" active={pathname === "/hype"} />
         <NavItem href="/leaderboard" icon={<Trophy size={20} />} label="Leaderboard" active={pathname === "/leaderboard"} />
         <NavItem href="/analytics" icon={<BarChart3 size={20} />} label="Analytics" active={pathname === "/analytics"} />
       </nav>

@@ -64,10 +64,12 @@ export default function NeuralWarRoom() {
       const users = usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setTotalUsers(users.length);
 
-      // 2. Fetch All Archive Images
-      addLog("Caching Multimedia Vault...");
-      const archiveSnap = await getDocs(query(collection(db, "archive"), where("type", "==", "image")));
-      const archiveImages = archiveSnap.docs.map(doc => doc.data());
+      // 2. Fetch All Archive Images from Cloudinary
+      addLog("Caching Multimedia Vault from Cloudinary...");
+      const response = await fetch('/api/cloudinary/archive');
+      const result = await response.json();
+      if (!result.success) throw new Error("Failed to load Cloudinary assets.");
+      const archiveImages = result.data.filter((d: any) => d.type === "image");
       addLog(`Vault cached: ${archiveImages.length} frames ready for analysis.`);
 
       // 3. Process Each User
@@ -105,7 +107,7 @@ export default function NeuralWarRoom() {
             const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
             
             const results = detections.map(d => faceMatcher.findBestMatch(d.descriptor));
-            const isMatch = results.some(r => r.label !== 'unknown' && r.distance < 0.6);
+            const isMatch = results.some(r => r.label !== 'unknown' && r.distance < 0.45);
 
             if (isMatch) {
               matchesForThisUser.push(item);

@@ -138,7 +138,7 @@ export default function HypeForge() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold serif text-zinc-100">Hype Board Forge</h1>
+          <h1 className="text-4xl font-bold serif text-zinc-100">Notification Bar Forge</h1>
           <p className="text-zinc-500 italic mt-2">Forge multimedia milestones and broadcast updates to the batch.</p>
         </div>
         <button 
@@ -177,9 +177,9 @@ export default function HypeForge() {
               
               {/* Media Preview in Card */}
               {(item.mediaGallery && item.mediaGallery.length > 0) ? (
-                <div className="grid grid-cols-2 gap-2 aspect-video w-full rounded-2xl overflow-hidden mb-4 border border-zinc-800 bg-black/40 group-hover:border-amber-500/30 transition-all">
+                <div className="grid grid-cols-2 gap-2 w-full rounded-2xl overflow-hidden mb-4 border border-zinc-800 bg-black/40 group-hover:border-amber-500/30 transition-all">
                   {item.mediaGallery.slice(0, 4).map((asset, idx) => (
-                    <div key={idx} className="relative h-full w-full overflow-hidden">
+                    <div key={idx} className="relative aspect-square w-full overflow-hidden">
                       {asset.type === 'image' && <img src={asset.url} className="w-full h-full object-cover" />}
                       {asset.type === 'video' && <div className="w-full h-full flex items-center justify-center bg-zinc-900"><Film size={20} className="text-zinc-700" /></div>}
                       {asset.type === 'audio' && <div className="w-full h-full flex items-center justify-center bg-zinc-900"><Music size={20} className="text-zinc-700" /></div>}
@@ -192,10 +192,10 @@ export default function HypeForge() {
                   ))}
                 </div>
               ) : item.mediaURL ? (
-                <div className="aspect-video w-full rounded-2xl overflow-hidden mb-4 border border-zinc-800 bg-black/40 group-hover:border-amber-500/30 transition-all">
-                  {item.mediaType === 'image' && <img src={item.mediaURL} className="w-full h-full object-cover" />}
-                  {item.mediaType === 'video' && <div className="w-full h-full flex items-center justify-center bg-zinc-900"><Film size={32} className="text-zinc-700" /></div>}
-                  {item.mediaType === 'audio' && <div className="w-full h-full flex items-center justify-center bg-zinc-900"><Music size={32} className="text-zinc-700" /></div>}
+                <div className="w-full rounded-2xl overflow-hidden mb-4 border border-zinc-800 bg-black/40 group-hover:border-amber-500/30 transition-all">
+                  {item.mediaType === 'image' && <img src={item.mediaURL} className="w-full h-auto object-contain" />}
+                  {item.mediaType === 'video' && <div className="w-full aspect-video flex items-center justify-center bg-zinc-900"><Film size={32} className="text-zinc-700" /></div>}
+                  {item.mediaType === 'audio' && <div className="w-full aspect-video flex items-center justify-center bg-zinc-900"><Music size={32} className="text-zinc-700" /></div>}
                 </div>
               ) : null}
 

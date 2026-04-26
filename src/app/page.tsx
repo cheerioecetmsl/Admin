@@ -124,7 +124,7 @@ export default function AdminDashboard() {
         />
         <StatCard 
           icon={<Megaphone className="text-purple-500" />} 
-          label="Active Hype" 
+          label="Active Notifications" 
           value={stats.activeHype.toString()} 
           trend="Live broadcasts"
         />
