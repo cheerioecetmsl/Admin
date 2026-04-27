@@ -29,6 +29,7 @@ export function Sidebar() {
           <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Management</span>
         </div>
         <NavItem href="/people" icon={<ShieldCheck size={20} />} label="The Pantheon" active={pathname === "/people"} />
+        <NavItem href="/legacy" icon={<GraduationCap size={20} />} label="Legacy Management" active={pathname === "/legacy"} />
         <NavItem href="/hero-manager" icon={<BarChart3 size={20} />} label="Hero Manager" active={pathname === "/hero-manager"} />
         <NavItem href="/hype" icon={<Megaphone size={20} />} label="Notification Bar" active={pathname === "/hype"} />
         <NavItem href="/leaderboard" icon={<Trophy size={20} />} label="Leaderboard" active={pathname === "/leaderboard"} />
