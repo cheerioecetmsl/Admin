@@ -12,6 +12,10 @@ interface Person {
   description: string;
   category: 'COUNCIL' | 'LEGEND' | 'FACULTY';
   imageURL?: string;
+  instagram?: string;
+  facebook?: string;
+  github?: string;
+  linkedin?: string;
   createdAt: any;
 }
 
@@ -28,7 +32,11 @@ export default function PeopleManagement() {
     role: "",
     description: "",
     category: 'COUNCIL' as 'COUNCIL' | 'LEGEND' | 'FACULTY',
-    imageURL: ""
+    imageURL: "",
+    instagram: "",
+    facebook: "",
+    github: "",
+    linkedin: ""
   });
 
   const fetchPeople = async () => {
@@ -289,6 +297,49 @@ export default function PeopleManagement() {
                     <option value="LEGEND">THE LEGENDS</option>
                     <option value="FACULTY">THE MENTORS</option>
                   </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-800/50">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Instagram URL</label>
+                    <input 
+                      type="url"
+                      placeholder="https://..."
+                      className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl outline-none focus:border-amber-500 transition-all text-xs"
+                      value={formData.instagram}
+                      onChange={e => setFormData({...formData, instagram: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Facebook URL</label>
+                    <input 
+                      type="url"
+                      placeholder="https://..."
+                      className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl outline-none focus:border-amber-500 transition-all text-xs"
+                      value={formData.facebook}
+                      onChange={e => setFormData({...formData, facebook: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">GitHub URL</label>
+                    <input 
+                      type="url"
+                      placeholder="https://..."
+                      className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl outline-none focus:border-amber-500 transition-all text-xs"
+                      value={formData.github}
+                      onChange={e => setFormData({...formData, github: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">LinkedIn URL</label>
+                    <input 
+                      type="url"
+                      placeholder="https://..."
+                      className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl outline-none focus:border-amber-500 transition-all text-xs"
+                      value={formData.linkedin}
+                      onChange={e => setFormData({...formData, linkedin: e.target.value})}
+                    />
+                  </div>
                 </div>
               </div>
 
