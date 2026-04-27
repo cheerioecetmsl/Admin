@@ -104,7 +104,7 @@ export default function PeopleManagement() {
       }
       setIsModalOpen(false);
       setEditingId(null);
-      setFormData({ name: "", role: "", description: "", category: activeCategory, imageURL: "" });
+      setFormData({ name: "", role: "", description: "", category: activeCategory, imageURL: "", instagram: "", facebook: "", github: "", linkedin: "" });
       fetchPeople();
     } catch (err) {
       console.error("Save Person Error:", err);
@@ -135,7 +135,7 @@ export default function PeopleManagement() {
         <button 
           onClick={() => {
             setEditingId(null);
-            setFormData({ name: "", role: "", description: "", category: activeCategory, imageURL: "" });
+            setFormData({ name: "", role: "", description: "", category: activeCategory, imageURL: "", instagram: "", facebook: "", github: "", linkedin: "" });
             setIsModalOpen(true);
           }}
           className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-ink rounded-xl font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
@@ -203,7 +203,11 @@ export default function PeopleManagement() {
                       role: person.role,
                       description: person.description,
                       category: person.category,
-                      imageURL: person.imageURL || ""
+                      imageURL: person.imageURL || "",
+                      instagram: person.instagram || "",
+                      facebook: person.facebook || "",
+                      github: person.github || "",
+                      linkedin: person.linkedin || ""
                     });
                     setIsModalOpen(true);
                   }}
