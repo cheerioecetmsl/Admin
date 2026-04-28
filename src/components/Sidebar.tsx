@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap } from "lucide-react";
+import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -32,6 +32,7 @@ export function Sidebar() {
         <NavItem href="/legacy" icon={<GraduationCap size={20} />} label="Legacy Management" active={pathname === "/legacy"} />
         <NavItem href="/hero-manager" icon={<BarChart3 size={20} />} label="Hero Manager" active={pathname === "/hero-manager"} />
         <NavItem href="/hype" icon={<Megaphone size={20} />} label="Notification Bar" active={pathname === "/hype"} />
+        <NavItem href="/engagement" icon={<Vote size={20} />} label="Engagement Control" active={pathname === "/engagement"} />
         <NavItem href="/leaderboard" icon={<Trophy size={20} />} label="Leaderboard" active={pathname === "/leaderboard"} />
         <NavItem href="/analytics" icon={<BarChart3 size={20} />} label="Analytics" active={pathname === "/analytics"} />
       </nav>
