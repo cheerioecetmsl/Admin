@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc, query, orderBy, limit } from "firebase/firestore";
-import { Users, Search, Trash2, Filter, MoreVertical, Mail, Hash, Calendar } from "lucide-react";
+import { collection, getDocs, deleteDoc, doc, query, orderBy, limit, updateDoc } from "firebase/firestore";
+import { Users, Search, Trash2, Filter, MoreVertical, Mail, Hash, Calendar, Pencil, X } from "lucide-react";
 
 interface Archivist {
   uid: string;
@@ -15,6 +15,7 @@ interface Archivist {
   photoCount: number;
   createdAt: string;
   photoURL?: string;
+  category?: string;
 }
 
 export default function ArchivistsRegistry() {
@@ -22,6 +23,8 @@ export default function ArchivistsRegistry() {
   const [filteredUsers, setFilteredUsers] = useState<Archivist[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingUser, setEditingUser] = useState<Archivist | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", year: "", section: "" });
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -57,6 +60,30 @@ export default function ArchivistsRegistry() {
       fetchUsers();
     } catch (err) {
       console.error("Delete User Error:", err);
+    }
+  };
+
+  const handleEditClick = (u: Archivist) => {
+    setEditingUser(u);
+    setEditForm({ name: u.name, year: u.year || "", section: u.section || "" });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingUser) return;
+    try {
+      const category = editForm.year === "4th Year" ? "LEGEND" : editForm.year === "Faculty" ? "FACULTY" : "STUDENT";
+      await updateDoc(doc(db, "users", editingUser.uid), {
+        name: editForm.name,
+        year: editForm.year,
+        section: editForm.section,
+        category: category,
+        hasSeenTutorial: true,
+        hasSeenSeniorInvite: false
+      });
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err) {
+      console.error("Edit User Error:", err);
     }
   };
 
@@ -163,6 +190,12 @@ export default function ArchivistsRegistry() {
                       >
                         <Trash2 size={16} />
                       </button>
+                      <button 
+                        onClick={() => handleEditClick(u)}
+                        className="p-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-amber-400 rounded-xl transition-all"
+                      >
+                        <Pencil size={16} />
+                      </button>
                       <button className="p-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-200 rounded-xl transition-all">
                         <MoreVertical size={16} />
                       </button>
@@ -174,6 +207,64 @@ export default function ArchivistsRegistry() {
           </tbody>
         </table>
       </div>
+
+      {/* Edit Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-md w-full space-y-6 shadow-2xl">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold serif text-zinc-100">Edit Archivist</h2>
+              <button onClick={() => setEditingUser(null)} className="text-zinc-500 hover:text-zinc-300">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Name</label>
+                <input 
+                  type="text" 
+                  value={editForm.name} 
+                  onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-200 outline-none focus:border-amber-500"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Year</label>
+                <select 
+                  value={editForm.year} 
+                  onChange={e => setEditForm({ ...editForm, year: e.target.value })}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-200 outline-none focus:border-amber-500"
+                >
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                  <option value="Faculty">Faculty</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Section</label>
+                <input 
+                  type="text" 
+                  value={editForm.section} 
+                  onChange={e => setEditForm({ ...editForm, section: e.target.value })}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-200 outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+
+            <button 
+              onClick={handleSaveEdit}
+              className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-widest rounded-xl transition-colors text-xs"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
