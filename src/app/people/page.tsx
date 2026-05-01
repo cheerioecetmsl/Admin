@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, writeBatch } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, writeBatch, where } from "firebase/firestore";
 import { Users, ShieldCheck, GraduationCap, Plus, Trash2, X, Camera, Loader2, ChevronUp, ChevronDown, GripVertical, Save } from "lucide-react";
 import { Reorder, useDragControls } from "framer-motion";
 
@@ -19,11 +19,13 @@ interface Person {
   linkedin?: string;
   createdAt: any;
   order?: number;
+  sourceCollection?: 'people' | 'users';
 }
 
 export default function PeopleManagement() {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<'COUNCIL' | 'LEGEND' | 'FACULTY'>('COUNCIL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -45,13 +47,45 @@ export default function PeopleManagement() {
 
   const fetchPeople = async () => {
     setLoading(true);
+    setFetchError(null);
     try {
       const q = query(collection(db, "people"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Person));
-      setPeople(data);
-    } catch (err) {
+      const peopleData = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), sourceCollection: 'people' } as Person));
+      
+      // Fetch without status to avoid composite index requirements, then filter in-memory
+      const qLegend = query(collection(db, "users"), where("category", "==", "LEGEND"));
+      const qFaculty = query(collection(db, "users"), where("category", "==", "FACULTY"));
+      
+      const [legendSnap, facultySnap] = await Promise.all([getDocs(qLegend), getDocs(qFaculty)]);
+      
+      const formatUser = (doc: any) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || "Unknown",
+          role: data.role || (data.category === 'LEGEND' ? 'Senior' : 'Faculty'),
+          description: data.narrative || data.description || "Member of the Pantheon",
+          category: data.category as 'LEGEND' | 'FACULTY',
+          imageURL: data.photoURL || data.imageURL || "",
+          instagram: data.instagram || "",
+          facebook: data.facebook || "",
+          github: data.github || "",
+          linkedin: data.linkedin || "",
+          createdAt: data.createdAt || new Date().toISOString(),
+          order: data.order,
+          sourceCollection: 'users'
+        } as Person;
+      };
+
+      const usersData = [...legendSnap.docs, ...facultySnap.docs]
+        .filter(doc => doc.data().status === "approved")
+        .map(formatUser);
+
+      setPeople([...peopleData, ...usersData]);
+    } catch (err: any) {
       console.error("Fetch People Error:", err);
+      setFetchError(err.message || "Unknown error fetching data.");
     } finally {
       setLoading(false);
     }
@@ -117,7 +151,23 @@ export default function PeopleManagement() {
     e.preventDefault();
     try {
       if (editingId) {
-        await updateDoc(doc(db, "people", editingId), formData);
+        const targetPerson = people.find(p => p.id === editingId);
+        const targetCollection = targetPerson?.sourceCollection || 'people';
+        if (targetCollection === 'users') {
+          await updateDoc(doc(db, "users", editingId), {
+            name: formData.name,
+            role: formData.role,
+            narrative: formData.description,
+            category: formData.category,
+            photoURL: formData.imageURL,
+            instagram: formData.instagram,
+            facebook: formData.facebook,
+            github: formData.github,
+            linkedin: formData.linkedin,
+          });
+        } else {
+          await updateDoc(doc(db, "people", editingId), formData);
+        }
       } else {
         // New entries get an order value at the end of their category
         const categoryPeople = people.filter(p => p.category === formData.category);
@@ -140,7 +190,17 @@ export default function PeopleManagement() {
   const handleDelete = async (id: string) => {
     if (!confirm("Remove this individual from the archive directory?")) return;
     try {
-      await deleteDoc(doc(db, "people", id));
+      const targetPerson = people.find(p => p.id === id);
+      const targetCollection = targetPerson?.sourceCollection || 'people';
+      
+      if (targetCollection === 'users') {
+        // For users, we reject them instead of fully deleting from users collection
+        // so they can potentially re-apply or just be hidden from the active directory.
+        await updateDoc(doc(db, "users", id), { status: "rejected" });
+      } else {
+        await deleteDoc(doc(db, "people", id));
+      }
+      
       fetchPeople();
     } catch (err) {
       console.error("Delete Person Error:", err);
@@ -196,7 +256,8 @@ export default function PeopleManagement() {
       const batch = writeBatch(db);
       const currentFiltered = getSortedFiltered(people, activeCategory);
       currentFiltered.forEach((person, index) => {
-        const ref = doc(db, "people", person.id);
+        const coll = person.sourceCollection || 'people';
+        const ref = doc(db, coll, person.id);
         batch.update(ref, { order: index });
       });
       await batch.commit();
@@ -230,17 +291,19 @@ export default function PeopleManagement() {
               Save Order
             </button>
           )}
-          <button 
-            onClick={() => {
-              setEditingId(null);
-              setFormData({ name: "", role: "", description: "", category: activeCategory, imageURL: "", instagram: "", facebook: "", github: "", linkedin: "" });
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-ink rounded-xl font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
-          >
-            <Plus size={18} />
-            Add to Directory
-          </button>
+          {activeCategory === 'COUNCIL' && (
+            <button 
+              onClick={() => {
+                setEditingId(null);
+                setFormData({ name: "", role: "", description: "", category: activeCategory, imageURL: "", instagram: "", facebook: "", github: "", linkedin: "" });
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-ink rounded-xl font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
+            >
+              <Plus size={18} />
+              Add to Directory
+            </button>
+          )}
         </div>
       </div>
 
@@ -265,6 +328,13 @@ export default function PeopleManagement() {
           onClick={() => { setActiveCategory('FACULTY'); setOrderDirty(false); }} 
         />
       </div>
+
+      {fetchError && (
+        <div className="p-6 bg-red-900/20 border border-red-500/50 rounded-2xl text-red-400">
+          <h3 className="font-bold text-lg mb-2">Error Loading Data</h3>
+          <p className="font-mono text-xs break-all">{fetchError}</p>
+        </div>
+      )}
 
       {/* Reorderable List of People */}
       {loading ? (
@@ -378,6 +448,7 @@ export default function PeopleManagement() {
                     className="w-full bg-black/40 border border-zinc-800 p-4 rounded-xl outline-none focus:border-amber-500 transition-all text-sm font-bold uppercase tracking-widest appearance-none"
                     value={formData.category}
                     onChange={e => setFormData({...formData, category: e.target.value as any})}
+                    disabled={!editingId && activeCategory !== 'COUNCIL'}
                   >
                     <option value="COUNCIL">THE COUNCIL</option>
                     <option value="LEGEND">THE LEGENDS</option>
