@@ -21,6 +21,7 @@ interface Person {
   order?: number;
   sourceCollection?: 'people' | 'users';
   status?: string;
+  presence?: string;
   lastSeen?: any;
 }
 
@@ -78,6 +79,7 @@ export default function PeopleManagement() {
           order: data.order,
           sourceCollection: 'users',
           status: data.status,
+          presence: data.presence,
           lastSeen: data.lastSeen
         } as Person;
       };
@@ -593,7 +595,7 @@ function ReorderableCard({ person, index, total, onMoveUp, onMoveDown, onEdit, o
             </div>
           )}
         </div>
-        {person.status === 'online' && (
+        {person.presence === 'online' && (
           <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-[3px] border-[#0A0A0A] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
         )}
       </div>

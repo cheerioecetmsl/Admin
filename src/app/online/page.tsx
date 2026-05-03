@@ -12,7 +12,7 @@ interface ActiveUser {
   email: string;
   photoURL?: string;
   onlineSince?: any;
-  status: string;
+  presence: string;
 }
 
 export default function LiveStatusPage() {
@@ -22,7 +22,7 @@ export default function LiveStatusPage() {
   useEffect(() => {
     const q = query(
       collection(db, "users"),
-      where("status", "==", "online")
+      where("presence", "==", "online")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {

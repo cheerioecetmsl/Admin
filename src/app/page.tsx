@@ -119,7 +119,7 @@ export default function AdminDashboard() {
         <StatCard 
           icon={<Activity className="text-green-500" />} 
           label="Live Sync" 
-          value={recentUsers.filter(u => u.status === 'online').length.toString()} 
+          value={recentUsers.filter(u => u.presence === 'online').length.toString()} 
           trend="Currently within network"
         />
         <StatCard 
@@ -214,14 +214,14 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </div>
-                    {u.status === 'online' && (
+                    {u.presence === 'online' && (
                       <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-[3px] border-[#0A0A0A] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
                     )}
                   </div>
                   <div>
                     <p className="text-sm font-bold truncate w-32">{u.name}</p>
                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
-                      Sec {u.section} • {u.status === 'online' ? (
+                      Sec {u.section} • {u.presence === 'online' ? (
                         <span className="text-green-500">Online Now</span>
                       ) : (
                         <span>Last seen {u.lastSeen ? formatDistanceToNow(u.lastSeen.toDate ? u.lastSeen.toDate() : new Date(u.lastSeen), { addSuffix: true }) : "recently"}</span>
