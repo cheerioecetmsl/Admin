@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc, query, orderBy, limit, updateDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, query, orderBy, limit, updateDoc, onSnapshot } from "firebase/firestore";
 import { Users, Search, Trash2, Filter, MoreVertical, Mail, Hash, Calendar, Pencil, X } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface Archivist {
   uid: string;
@@ -16,6 +17,8 @@ interface Archivist {
   createdAt: string;
   photoURL?: string;
   category?: string;
+  status?: 'online' | 'offline';
+  lastSeen?: any;
 }
 
 export default function ArchivistsRegistry() {
@@ -26,23 +29,21 @@ export default function ArchivistsRegistry() {
   const [editingUser, setEditingUser] = useState<Archivist | null>(null);
   const [editForm, setEditForm] = useState({ name: "", year: "", section: "" });
 
-  const fetchUsers = async () => {
+  useEffect(() => {
     setLoading(true);
-    try {
-      const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      const data = snap.docs.map(doc => ({ ...doc.data() } as Archivist));
+    const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as Archivist));
       setUsers(data);
       setFilteredUsers(data);
-    } catch (err) {
-      console.error("Fetch Users Error:", err);
-    } finally {
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error("Fetch Users Error:", error);
+      setLoading(false);
+    });
 
-  useEffect(() => {
-    fetchUsers();
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function ArchivistsRegistry() {
     );
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
+
 
   const handleDelete = async (uid: string) => {
     if (!confirm("Remove this archivist from the ledger? This action is permanent.")) return;
@@ -160,22 +162,34 @@ export default function ArchivistsRegistry() {
                         <Mail size={12} className="text-zinc-600" />
                         {u.email}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                        <Hash size={10} className="text-zinc-700" />
-                        {u.uid.slice(0, 8)}...
+                        <div className="flex items-center gap-2 text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                          <Hash size={10} className="text-zinc-700" />
+                          {u.uid.slice(0, 8)}...
+                        </div>
+                        {u.status === 'offline' && u.lastSeen && (
+                          <div className="text-[9px] text-zinc-600 font-medium">
+                            Last seen {formatDistanceToNow(u.lastSeen?.toDate ? u.lastSeen.toDate() : new Date(u.lastSeen), { addSuffix: true })}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <div className="flex gap-2">
-                      <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-bold text-amber-500 uppercase tracking-widest">
-                        {u.year}
-                      </span>
-                      <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                        Sec {u.section}
-                      </span>
-                    </div>
-                  </td>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex gap-2 items-center">
+                        <div className="flex flex-col gap-1">
+                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-tighter w-fit ${
+                            u.status === 'online' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-zinc-800 text-zinc-500'
+                          }`}>
+                            {u.status || 'offline'}
+                          </span>
+                          <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+                            {u.year}
+                          </span>
+                        </div>
+                        <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                          Sec {u.section}
+                        </span>
+                      </div>
+                    </td>
                   <td className="p-6">
                     <div className="flex flex-col items-center gap-1">
                       <span className="text-lg font-bold serif text-zinc-100">{u.xp}</span>

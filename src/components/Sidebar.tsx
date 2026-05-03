@@ -2,22 +2,23 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote } from "lucide-react";
+import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote, Activity } from "lucide-react";
 
-export function Sidebar() {
+export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 border-r border-zinc-800 bg-black/50 backdrop-blur-xl flex flex-col sticky top-0 h-screen">
+    <aside className="w-72 border-r border-zinc-800 bg-black/50 backdrop-blur-xl flex flex-col h-full">
       <div className="p-8 border-b border-zinc-800">
         <h1 className="text-xl font-bold tracking-tighter serif text-amber-500">
           CHEERIO <span className="text-zinc-500">ADMIN</span>
         </h1>
       </div>
 
-      <nav className="flex-1 p-6 space-y-2">
-        <NavItem href="/" icon={<LayoutDashboard size={20} />} label="Overview" active={pathname === "/"} />
-        <NavItem href="/archivists" icon={<Users size={20} />} label="Archivists" active={pathname === "/archivists"} />
+      <nav className="flex-1 p-6 space-y-2 overflow-y-auto custom-scrollbar">
+        <NavItem href="/" icon={<LayoutDashboard size={20} />} label="Overview" active={pathname === "/"} onClick={onSelect} />
+        <NavItem href="/online" icon={<Activity size={20} />} label="Live Status" active={pathname === "/online"} onClick={onSelect} />
+        <NavItem href="/archivists" icon={<Users size={20} />} label="Archivists" active={pathname === "/archivists"} onClick={onSelect} />
         
         <div className="pt-4 pb-2 px-4">
           <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Approvals</span>
@@ -48,10 +49,11 @@ export function Sidebar() {
   );
 }
 
-function NavItem({ href, icon, label, active }: { href: string, icon: React.ReactNode, label: string, active: boolean }) {
+function NavItem({ href, icon, label, active, onClick }: { href: string, icon: React.ReactNode, label: string, active: boolean, onClick?: () => void }) {
   return (
     <Link 
       href={href}
+      onClick={onClick}
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
         active 
           ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" 
@@ -63,3 +65,4 @@ function NavItem({ href, icon, label, active }: { href: string, icon: React.Reac
     </Link>
   );
 }
+

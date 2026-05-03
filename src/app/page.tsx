@@ -5,7 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
 import { Users, Megaphone, Activity, ArrowUpRight, TrendingUp, Trophy, Scan } from "lucide-react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { format, subDays, startOfDay, isSameDay } from "date-fns";
+import { format, subDays, startOfDay, isSameDay, formatDistanceToNow } from "date-fns";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
         <StatCard 
           icon={<Users className="text-amber-500" />} 
           label="Total Archivists" 
@@ -117,14 +117,14 @@ export default function AdminDashboard() {
           trend="Real-time population"
         />
         <StatCard 
-          icon={<Activity className="text-blue-500" />} 
-          label="Joined Today" 
-          value={stats.joinedToday.toString()} 
-          trend="New entries today"
+          icon={<Activity className="text-green-500" />} 
+          label="Live Sync" 
+          value={recentUsers.filter(u => u.status === 'online').length.toString()} 
+          trend="Currently within network"
         />
         <StatCard 
           icon={<Megaphone className="text-purple-500" />} 
-          label="Active Notifications" 
+          label="Notifications" 
           value={stats.activeHype.toString()} 
           trend="Live broadcasts"
         />
@@ -136,11 +136,12 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Charts Section */}
+      {/* Charts & Online Feed Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Main Chart */}
-        <div className="lg:col-span-2 card-blur p-8 rounded-3xl space-y-6">
+        <div className="lg:col-span-2 card-blur p-6 lg:p-8 rounded-[2rem] space-y-6">
+
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-bold serif flex items-center gap-2">
               <TrendingUp size={20} className="text-amber-500" />
@@ -189,36 +190,59 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="card-blur p-8 rounded-3xl space-y-6">
-          <h3 className="text-xl font-bold serif">Latest Registry Entries</h3>
+        <div className="card-blur p-6 lg:p-8 rounded-[2rem] space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-bold serif">Live Pulse</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Live Feed</span>
+            </div>
+          </div>
           <div className="space-y-6">
             {recentUsers.length === 0 ? (
-              <p className="text-center text-zinc-600 italic py-10">No new archivists detected.</p>
-            ) : recentUsers.map((u, i) => (
+              <p className="text-center text-zinc-600 italic py-10">No pulse detected.</p>
+            ) : recentUsers.slice(0, 6).map((u, i) => (
               <div key={i} className="flex items-center justify-between group">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 overflow-hidden">
-                    {u.photoURL ? (
-                      <img src={u.photoURL} className="w-full h-full object-cover" alt={u.name} />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs font-bold text-amber-500/20">
-                        {u.name?.charAt(0)}
-                      </div>
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 overflow-hidden">
+                      {u.photoURL ? (
+                        <img src={u.photoURL} className="w-full h-full object-cover" alt={u.name} />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs font-bold text-amber-500/20">
+                          {u.name?.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    {u.status === 'online' && (
+                      <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-[3px] border-[#0A0A0A] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
                     )}
                   </div>
                   <div>
                     <p className="text-sm font-bold truncate w-32">{u.name}</p>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Sec {u.section} • {format(new Date(u.createdAt), "HH:mm")}</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
+                      Sec {u.section} • {u.status === 'online' ? (
+                        <span className="text-green-500">Online Now</span>
+                      ) : (
+                        <span>Last seen {u.lastSeen ? formatDistanceToNow(u.lastSeen.toDate ? u.lastSeen.toDate() : new Date(u.lastSeen), { addSuffix: true }) : "recently"}</span>
+                      )}
+                    </p>
                   </div>
+
                 </div>
                 <ArrowUpRight size={16} className="text-zinc-700 group-hover:text-amber-500 transition-colors" />
               </div>
             ))}
           </div>
-          <button className="w-full py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-all">
-            Manage Registry
+          <button 
+            onClick={() => window.location.href = '/online'}
+            className="w-full py-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-[10px] font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-zinc-950 hover:border-amber-500 transition-all active:scale-95"
+          >
+            Monitor Live Status
           </button>
+
         </div>
+
 
       </div>
 

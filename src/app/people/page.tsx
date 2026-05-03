@@ -20,6 +20,8 @@ interface Person {
   createdAt: any;
   order?: number;
   sourceCollection?: 'people' | 'users';
+  status?: string;
+  lastSeen?: any;
 }
 
 export default function PeopleManagement() {
@@ -74,7 +76,9 @@ export default function PeopleManagement() {
           linkedin: data.linkedin || "",
           createdAt: data.createdAt || new Date().toISOString(),
           order: data.order,
-          sourceCollection: 'users'
+          sourceCollection: 'users',
+          status: data.status,
+          lastSeen: data.lastSeen
         } as Person;
       };
 
@@ -579,13 +583,18 @@ function ReorderableCard({ person, index, total, onMoveUp, onMoveDown, onEdit, o
       </div>
 
       {/* Avatar */}
-      <div className="w-14 h-14 rounded-full border-2 border-zinc-800 overflow-hidden bg-zinc-900 flex-shrink-0 group-hover:border-amber-500/30 transition-all">
-        {person.imageURL ? (
-          <img src={person.imageURL} className="w-full h-full object-cover" alt={person.name} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-lg font-bold text-zinc-700 uppercase">
-            {person.name.charAt(0)}
-          </div>
+      <div className="relative">
+        <div className="w-14 h-14 rounded-full border-2 border-zinc-800 overflow-hidden bg-zinc-900 flex-shrink-0 group-hover:border-amber-500/30 transition-all">
+          {person.imageURL ? (
+            <img src={person.imageURL} className="w-full h-full object-cover" alt={person.name} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-lg font-bold text-zinc-700 uppercase">
+              {person.name.charAt(0)}
+            </div>
+          )}
+        </div>
+        {person.status === 'online' && (
+          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-[3px] border-[#0A0A0A] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
         )}
       </div>
 
