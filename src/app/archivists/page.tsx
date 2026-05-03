@@ -59,7 +59,7 @@ export default function ArchivistsRegistry() {
     if (!confirm("Remove this archivist from the ledger? This action is permanent.")) return;
     try {
       await deleteDoc(doc(db, "users", uid));
-      fetchUsers();
+      // snapshot will update automatically
     } catch (err) {
       console.error("Delete User Error:", err);
     }
@@ -83,7 +83,7 @@ export default function ArchivistsRegistry() {
         hasSeenSeniorInvite: false
       });
       setEditingUser(null);
-      fetchUsers();
+      // snapshot will update automatically
     } catch (err) {
       console.error("Edit User Error:", err);
     }
