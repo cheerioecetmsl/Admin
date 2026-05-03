@@ -17,7 +17,7 @@ interface Archivist {
   createdAt: string;
   photoURL?: string;
   category?: string;
-  status?: 'online' | 'offline';
+  presence?: 'online' | 'offline';
   lastSeen?: any;
 }
 
@@ -166,7 +166,7 @@ export default function ArchivistsRegistry() {
                           <Hash size={10} className="text-zinc-700" />
                           {u.uid.slice(0, 8)}...
                         </div>
-                        {u.status === 'offline' && u.lastSeen && (
+                        {u.presence === 'offline' && u.lastSeen && (
                           <div className="text-[9px] text-zinc-600 font-medium">
                             Last seen {formatDistanceToNow(u.lastSeen?.toDate ? u.lastSeen.toDate() : new Date(u.lastSeen), { addSuffix: true })}
                           </div>
@@ -177,9 +177,9 @@ export default function ArchivistsRegistry() {
                       <div className="flex gap-2 items-center">
                         <div className="flex flex-col gap-1">
                           <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-tighter w-fit ${
-                            u.status === 'online' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-zinc-800 text-zinc-500'
+                            u.presence === 'online' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-zinc-800 text-zinc-500'
                           }`}>
-                            {u.status || 'offline'}
+                            {u.presence || 'offline'}
                           </span>
                           <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-bold text-amber-500 uppercase tracking-widest">
                             {u.year}
