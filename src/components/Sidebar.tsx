@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote, Activity } from "lucide-react";
+import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote, Activity, Shield } from "lucide-react";
 
 export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const pathname = usePathname();
@@ -15,7 +15,7 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
         </h1>
       </div>
 
-      <nav className="flex-1 p-6 space-y-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 p-6 space-y-2 overflow-y-auto min-h-0 custom-scrollbar">
         <NavItem href="/" icon={<LayoutDashboard size={20} />} label="Overview" active={pathname === "/"} onClick={onSelect} />
         <NavItem href="/online" icon={<Activity size={20} />} label="Live Status" active={pathname === "/online"} onClick={onSelect} />
         <NavItem href="/archivists" icon={<Users size={20} />} label="Archivists" active={pathname === "/archivists"} onClick={onSelect} />
@@ -30,6 +30,7 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
           <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Management</span>
         </div>
         <NavItem href="/people" icon={<ShieldCheck size={20} />} label="The Pantheon" active={pathname === "/people"} />
+        <NavItem href="/moderation" icon={<Shield size={20} />} label="Moderation" active={pathname === "/moderation"} />
         <NavItem href="/legacy" icon={<GraduationCap size={20} />} label="Legacy Management" active={pathname === "/legacy"} />
         <NavItem href="/hero-manager" icon={<BarChart3 size={20} />} label="Hero Manager" active={pathname === "/hero-manager"} />
         <NavItem href="/hype" icon={<Megaphone size={20} />} label="Notification Bar" active={pathname === "/hype"} />
