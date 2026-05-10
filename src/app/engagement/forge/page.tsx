@@ -38,7 +38,7 @@ export default function EngagementForge() {
     setUploadingId(id);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-2026");
+    formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26");
 
     try {
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;

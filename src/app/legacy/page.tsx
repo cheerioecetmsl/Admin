@@ -54,7 +54,7 @@ export default function LegacyManagement() {
     try {
       const data = new FormData();
       data.append("file", file);
-      data.append("upload_preset", "Cheerio-2026");
+      data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26");
       
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       const res = await fetch(

@@ -64,7 +64,7 @@ export default function HypeForge() {
       const uploadPromises = Array.from(files).map(async (file) => {
         const data = new FormData();
         data.append("file", file);
-        data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-2026");
+        data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26");
         
         const resourceType = type === 'image' ? 'image' : (type === 'video' ? 'video' : 'auto');
         
