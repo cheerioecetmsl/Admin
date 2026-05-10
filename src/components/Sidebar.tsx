@@ -3,9 +3,17 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote, Activity, Shield } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 export function Sidebar({ onSelect }: { onSelect?: () => void }) {
   const pathname = usePathname();
+
+  const handleLogout = async () => {
+    if (confirm("Are you sure you want to log out of the command center?")) {
+      await signOut(auth);
+    }
+  };
 
   return (
     <aside className="w-72 border-r border-zinc-800 bg-black/50 backdrop-blur-xl flex flex-col h-full">
@@ -41,7 +49,10 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
 
       <div className="p-6 border-t border-zinc-800">
         <NavItem href="/settings" icon={<Settings size={20} />} label="Settings" active={pathname === "/settings"} />
-        <button className="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-red-400 transition-colors w-full">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-red-400 transition-colors w-full text-left"
+        >
           <LogOut size={20} />
           <span className="text-sm font-medium">Log Out</span>
         </button>

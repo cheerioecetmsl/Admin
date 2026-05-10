@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "firebase/firestore";
 import { Megaphone, Plus, Trash2, Edit2, X, Calendar, Tag, Image as ImageIcon, Film, Music, Upload, Loader2, Play, Check, Camera, Layers } from "lucide-react";
+import { uploadBatch } from "@/lib/uploadHelper";
+import { getAssetSources } from "@/lib/imageStorage";
 
 interface MediaAsset {
   url: string;
@@ -61,29 +63,14 @@ export default function HypeForge() {
 
     setUploading(true);
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const data = new FormData();
-        data.append("file", file);
-        data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26");
-        
-        const resourceType = type === 'image' ? 'image' : (type === 'video' ? 'video' : 'auto');
-        
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
-          { method: "POST", body: data }
-        );
-        const resData = await res.json();
-        return { url: resData.secure_url, type };
-      });
-
-      const uploadedAssets = await Promise.all(uploadPromises);
+      const uploadedAssets = await uploadBatch(files, type, "Images");
       setFormData(prev => ({ 
         ...prev, 
-        mediaGallery: [...prev.mediaGallery, ...uploadedAssets]
+        mediaGallery: [...prev.mediaGallery, ...uploadedAssets as any]
       }));
     } catch (err) {
       console.error("Upload Error:", err);
-      alert("Batch upload failed. Check your Cloudinary config.");
+      alert("Sequential upload failed. Check your Cloudinary connection.");
     } finally {
       setUploading(false);
     }
@@ -180,7 +167,7 @@ export default function HypeForge() {
                 <div className="grid grid-cols-2 gap-2 w-full rounded-2xl overflow-hidden mb-4 border border-zinc-800 bg-black/40 group-hover:border-amber-500/30 transition-all">
                   {item.mediaGallery.slice(0, 4).map((asset, idx) => (
                     <div key={idx} className="relative aspect-square w-full overflow-hidden">
-                      {asset.type === 'image' && <img src={asset.url} className="w-full h-full object-cover" />}
+                      {asset.type === 'image' && <img src={getAssetSources(asset.url).webp} className="w-full h-full object-cover" />}
                       {asset.type === 'video' && <div className="w-full h-full flex items-center justify-center bg-zinc-900"><Film size={20} className="text-zinc-700" /></div>}
                       {asset.type === 'audio' && <div className="w-full h-full flex items-center justify-center bg-zinc-900"><Music size={20} className="text-zinc-700" /></div>}
                       {idx === 3 && item.mediaGallery!.length > 4 && (

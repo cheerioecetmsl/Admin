@@ -5,6 +5,7 @@ import { Inter, EB_Garamond } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { Menu, X } from "lucide-react";
+import { AuthGuard } from "@/components/AuthGuard";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${ebGaramond.variable} antialiased min-h-screen bg-[#0A0A0A] text-zinc-100 flex overflow-hidden`}>
-        
+        <AuthGuard />
 
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (

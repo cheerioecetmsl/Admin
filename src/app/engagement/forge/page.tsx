@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { LayoutGrid, Vote, Trophy, Users, Plus, Trash2, Save, Send, Loader2, Camera, CheckCircle, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { uploadProcessedImage } from "@/lib/uploadHelper";
 
 type ModuleType = 'poll' | 'game' | 'result';
 
@@ -36,29 +37,14 @@ export default function EngagementForge() {
     if (!file) return;
 
     setUploadingId(id);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "Cheerio-26");
-
     try {
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await res.json();
-      if (data.secure_url) {
-        callback(data.secure_url);
-      } else {
-        alert("Upload failed: " + (data.error?.message || "Unknown error"));
+      const result = await uploadProcessedImage(file, "Engagement");
+      if (result.url) {
+        callback(result.url);
       }
     } catch (err) {
       console.error("Upload error:", err);
-      alert("Error uploading image.");
+      alert("Error uploading image to the engagement vault.");
     } finally {
       setUploadingId(null);
     }
