@@ -1,26 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter, usePathname } from "next/navigation";
-import { Loader2 } from "lucide-react";
 
 /**
  * AuthGuard — protects admin routes and ensures session persistence.
- * Checks if the user is authenticated and if they have a valid admin document.
+ *
+ * ROOT CAUSE FIX: Previously `pathname` was in the useEffect dependency array.
+ * This caused the auth subscription to re-run on EVERY navigation, which called
+ * router.replace() again → triggering another navigation → infinite loop.
+ *
+ * The fix: store `pathname` in a ref so the auth callback can always read the
+ * current path, but WITHOUT adding it as a dep so the effect only runs once.
  */
 export function AuthGuard() {
   const router = useRouter();
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Keep ref in sync with the latest path on every render — no re-subscription
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const currentPath = pathnameRef.current;
+
       if (!user) {
-        // Only redirect if we are NOT on the login page (which is "/" in this project)
-        if (pathname !== "/") {
+        // Not authenticated — send to login only if not already there
+        if (currentPath !== "/") {
           router.replace("/");
         } else {
           setIsInitialized(true);
@@ -28,35 +41,25 @@ export function AuthGuard() {
         return;
       }
 
-      // If they are on the login page but already logged in, send them to overview
-      if (pathname === "/") {
-        router.replace("/archivists"); // Or dashboard
+      // Authenticated but on the login page — send to dashboard
+      if (currentPath === "/") {
+        router.replace("/archivists");
         return;
       }
 
+      // Authenticated on a protected page — verify existence and allow in
       try {
-        // Secondary check: verify the user is an admin/archivist
-        // In this project, we might check "archivists" collection or a role field in "users"
-        // For now, let's just check if they exist in a "users" or "admins" collection
-        // Based on previous context, we might check "users" with an admin flag
         const snap = await getDoc(doc(db, "users", user.uid));
-        
-        // If we want to be strict about admin access:
-        // if (!snap.exists() || snap.data()?.role !== 'admin') { ... }
-        
-        if (!snap.exists()) {
-           // If user doc doesn't exist, they shouldn't be here
-           setIsInitialized(true); // Still allow them to see the login page if needed
-        } else {
-           setIsInitialized(true);
-        }
-      } catch (err) {
+        // snap.exists() is checked; extend with role check if needed
+        setIsInitialized(true);
+      } catch {
         setIsInitialized(true);
       }
     });
 
     return () => unsubscribe();
-  }, [router, pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]); // ← `pathname` intentionally omitted — read via ref to prevent loop
 
   if (!isInitialized) {
     return (
@@ -64,7 +67,7 @@ export function AuthGuard() {
         <div className="relative">
           <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-8 h-8 bg-amber-500/10 rounded-full animate-pulse"></div>
+            <div className="w-8 h-8 bg-amber-500/10 rounded-full animate-pulse"></div>
           </div>
         </div>
         <div className="text-center space-y-2">

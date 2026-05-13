@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote, Activity, Shield } from "lucide-react";
+import { LayoutDashboard, Users, Megaphone, Trophy, BarChart3, Settings, LogOut, ShieldCheck, Star, GraduationCap, Vote, Activity, Shield, Radio } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 
@@ -44,6 +44,7 @@ export function Sidebar({ onSelect }: { onSelect?: () => void }) {
         <NavItem href="/hype" icon={<Megaphone size={20} />} label="Notification Bar" active={pathname === "/hype"} />
         <NavItem href="/engagement" icon={<Vote size={20} />} label="Engagement Control" active={pathname === "/engagement"} />
         <NavItem href="/leaderboard" icon={<Trophy size={20} />} label="Leaderboard" active={pathname === "/leaderboard"} />
+        <NavItem href="/livestream" icon={<Radio size={20} />} label="Livestream Control" active={pathname === "/livestream"} />
         <NavItem href="/analytics" icon={<BarChart3 size={20} />} label="Analytics" active={pathname === "/analytics"} />
       </nav>
 
